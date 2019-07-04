@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = pong;
+  common = contrib/pong/pong.c;
+  enable = efi;
+};
