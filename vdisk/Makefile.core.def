@@ -1,0 +1,8 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = vdisk;
+  common = vdisk/vdiskctl.c;
+  common = vdisk/vdisk.c;
+  common = vdisk/vfs.c;
+};
