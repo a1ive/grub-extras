@@ -1,0 +1,9 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = hwmatch;
+  i386_pc = contrib/hwmatch/hwmatch.c;
+  enable = i386_pc;
+  cflags = '$(CFLAGS_POSIX) $(CFLAGS_GNULIB)';
+  cppflags = '$(CPPFLAGS_POSIX) $(CPPFLAGS_GNULIB)';
+};

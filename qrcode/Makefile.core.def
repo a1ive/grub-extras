@@ -1,0 +1,9 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = qrcode;
+  common = contrib/qrcode/qrcode.c;
+  common = contrib/qrcode/qr_encode.c;
+  cflags = '$(CFLAGS_POSIX)';
+  cppflags = '$(CPPFLAGS_POSIX)';
+};

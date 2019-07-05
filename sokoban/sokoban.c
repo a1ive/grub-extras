@@ -34,8 +34,8 @@
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
-struct grub_efi_gop *gop = NULL;
-grub_efi_guid_t graphics_output_guid = GRUB_EFI_GOP_GUID;
+static struct grub_efi_gop *gop = NULL;
+static grub_efi_guid_t graphics_output_guid = GRUB_EFI_GOP_GUID;
 
 static int CELLSIZE = 2;
 

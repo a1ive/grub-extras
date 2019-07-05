@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = bootmgr;
+  common = contrib/bootmgr/bootmgr.c;
+  enable = efi;
+};

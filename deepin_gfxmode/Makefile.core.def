@@ -1,0 +1,6 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = deepin_gfxmode;
+  common = contrib/deepin_gfxmode/deepin_gfxmode.c;
+};

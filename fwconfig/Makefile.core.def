@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = fwconfig;
+  common = contrib/fwconfig/fwconfig.c;
+  enable = x86;
+};

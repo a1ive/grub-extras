@@ -253,7 +253,7 @@ grub_vfsfs_open (struct grub_file *file, const char *path)
 static struct grub_disk_dev grub_vfs_dev =
 {
   .name = "vfsdev",
-  .id = GRUB_DISK_DEVICE_VFS_ID,
+  .id = GRUB_DISK_DEVICE_LOOPBACK_ID,
   .disk_iterate = grub_vfsdev_iterate,
   .disk_open = grub_vfsdev_open,
   .disk_close = grub_vfsdev_close,

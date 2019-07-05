@@ -101,8 +101,8 @@ grub_uint8_t numbers[][NUMBERHEIGHT][NUMBERWIDTH] = {
 #define BALLSIZE CELLSIZE
 #define BATCELLS 10
 
-struct grub_efi_gop *gop = NULL;
-grub_efi_guid_t graphics_output_guid = GRUB_EFI_GOP_GUID;
+static struct grub_efi_gop *gop = NULL;
+static grub_efi_guid_t graphics_output_guid = GRUB_EFI_GOP_GUID;
 
 static struct grub_efi_gop_blt_pixel white = {0xFF, 0xFF, 0xFF, 0};
 static struct grub_efi_gop_blt_pixel black = {0x00, 0x00, 0x00, 0};
