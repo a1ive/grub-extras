@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = sokoban;
+  common = contrib/sokoban/sokoban.c;
+  enable = efi;
+};
