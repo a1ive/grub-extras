@@ -1,0 +1,12 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = chip8;
+  common = contrib/chip8/main.c;
+  common = contrib/chip8/c8display.c;
+  common = contrib/chip8/c8fs.c;
+  common = contrib/chip8/c8input.c;
+  common = contrib/chip8/c8interpreter.c;
+  common = contrib/chip8/c8sound.c;
+  enable = efi;
+};
