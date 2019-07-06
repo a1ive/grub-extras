@@ -22,6 +22,7 @@
 #include <grub/misc.h>
 #include <grub/mm.h>
 #include <grub/err.h>
+#include <grub/disk.h>
 #include <grub/dl.h>
 #include <grub/extcmd.h>
 #include <grub/file.h>
@@ -31,13 +32,75 @@
 #include <grub/efi/api.h>
 #include <grub/efi/efi.h>
 #include <grub/efi/graphics_output.h>
+#include "level.h"
 
 GRUB_MOD_LICENSE ("GPLv3+");
+
+static const struct grub_arg_option options_sokoban[] = {
+  {"zoom", 'z', 0, N_("Magnifying the image size."), 0, 0},
+  {0, 0, 0, 0, 0, 0}
+};
+
+static unsigned char *sokoban_disk_addr;
+static unsigned int sokoban_disk_size = 0;
+
+static int
+grub_sokoban_iterate (grub_disk_dev_iterate_hook_t hook, void *hook_data,
+		      grub_disk_pull_t pull)
+{
+  if (pull != GRUB_DISK_PULL_NONE)
+    return 0;
+  return hook ("sokoban", hook_data);
+}
+
+static grub_err_t
+grub_sokoban_open (const char *name, grub_disk_t disk)
+{
+  if (grub_strcmp (name, "sokoban"))
+      return grub_error (GRUB_ERR_UNKNOWN_DEVICE, "not a sokoban memdisk");
+  disk->total_sectors = sokoban_disk_size / GRUB_DISK_SECTOR_SIZE;
+  disk->max_agglomerate = GRUB_DISK_MAX_MAX_AGGLOMERATE;
+  disk->id = 0;
+  return GRUB_ERR_NONE;
+}
+
+static void
+grub_sokoban_close (grub_disk_t disk __attribute((unused)))
+{
+}
+
+static grub_err_t
+grub_sokoban_read (grub_disk_t disk __attribute((unused)), grub_disk_addr_t sector,
+		    grub_size_t size, char *buf)
+{
+  grub_memcpy (buf, sokoban_disk_addr + (sector << GRUB_DISK_SECTOR_BITS), size << GRUB_DISK_SECTOR_BITS);
+  return 0;
+}
+
+static grub_err_t
+grub_sokoban_write (grub_disk_t disk __attribute((unused)), grub_disk_addr_t sector,
+		     grub_size_t size, const char *buf)
+{
+  grub_memcpy (sokoban_disk_addr + (sector << GRUB_DISK_SECTOR_BITS), buf, size << GRUB_DISK_SECTOR_BITS);
+  return 0;
+}
+
+static struct grub_disk_dev grub_sokoban_dev =
+  {
+    .name = "sokoban",
+    .id = GRUB_DISK_DEVICE_MEMDISK_ID,
+    .disk_iterate = grub_sokoban_iterate,
+    .disk_open = grub_sokoban_open,
+    .disk_close = grub_sokoban_close,
+    .disk_read = grub_sokoban_read,
+    .disk_write = grub_sokoban_write,
+    .next = 0
+  };
 
 static struct grub_efi_gop *gop = NULL;
 static grub_efi_guid_t graphics_output_guid = GRUB_EFI_GOP_GUID;
 
-static int CELLSIZE = 2;
+static int CELLSIZE = 1;
 
 typedef enum
 {
@@ -329,7 +392,7 @@ draw_map (void)
 }
 
 static grub_err_t
-load_map (char *buffer, grub_ssize_t size)
+load_map (unsigned char *buffer, grub_ssize_t size)
 {
   char c; 
   int _row = 0;
@@ -437,7 +500,7 @@ filrate (void)
 }
 
 static grub_err_t
-draw_game (char *buffer, grub_ssize_t size)
+draw_game (void *buffer, grub_ssize_t size)
 {
   clear_screen ();
   load_map (buffer, size);
@@ -528,25 +591,20 @@ play_game(void)
   return 0;
 }
 
-static grub_err_t
-grub_cmd_sokoban (grub_extcmd_context_t ctxt __attribute__ ((unused)),
-		int argc, char **args)
+static int
+game (const char *file_name)
 {
+  int win = 0;
+  unsigned char *buffer = NULL;
   grub_file_t file = 0;
-  grub_ssize_t size;
-  void *buffer = NULL;
-  if (argc != 1)
-  {
-    grub_error (GRUB_ERR_BAD_ARGUMENT, N_("unexpected arguments"));
-    goto fail;
-  }
-  file = grub_file_open (args[0], GRUB_FILE_TYPE_CAT);
+  grub_ssize_t size = 0;
+  file = grub_file_open (file_name, GRUB_FILE_TYPE_CAT);
   if (! file)
     goto fail;
   size = grub_file_size (file);
   if (!size)
   {
-    grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), args[0]);
+    grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), file_name);
     goto fail;
   }
   buffer = grub_malloc (size);
@@ -555,34 +613,13 @@ grub_cmd_sokoban (grub_extcmd_context_t ctxt __attribute__ ((unused)),
     grub_error (GRUB_ERR_OUT_OF_MEMORY, N_("out of memory"));
     goto fail;
   }
-
   if (grub_file_read (file, buffer, size) != size)
   {
     if (grub_errno == GRUB_ERR_NONE)
-	  grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), args[0]);
+      grub_error (GRUB_ERR_BAD_OS, N_("premature end of file %s"), file_name);
     goto fail;
   }
-  grub_efi_status_t status;
-  grub_efi_simple_text_output_mode_t saved_console_mode;
-  grub_efi_boot_services_t *b;
-  b = grub_efi_system_table->boot_services;
-  status = efi_call_3 (b->locate_protocol, &graphics_output_guid, NULL, (void **)&gop);
-  if (status != GRUB_EFI_SUCCESS)
-  {
-    grub_error (GRUB_ERR_BAD_OS, "Unable to locate Graphics Output Protocol.");
-    goto fail;
-  }
-  // Save the current console cursor position and attributes
-  grub_memcpy(&saved_console_mode,
-              grub_efi_system_table->con_out->mode,
-              sizeof(grub_efi_simple_text_output_mode_t));
-  efi_call_2 (grub_efi_system_table->con_out->enable_cursor,
-              grub_efi_system_table->con_out, 0);
-  efi_call_2 (grub_efi_system_table->con_out->set_attributes,
-              grub_efi_system_table->con_out,
-              GRUB_EFI_TEXT_ATTR(GRUB_EFI_LIGHTGRAY, GRUB_EFI_BACKGROUND_BLACK));
-  efi_call_3 (grub_efi_system_table->con_out->set_cursor_position,
-              grub_efi_system_table->con_out, 0, 0);
+
   int refresh = 1;
   do
   {
@@ -590,7 +627,7 @@ grub_cmd_sokoban (grub_extcmd_context_t ctxt __attribute__ ((unused)),
       draw_game (buffer, size);
     refresh = 0;
     if (grub_errno != GRUB_ERR_NONE)
-      goto fail;
+      return -1;
     int key = 0;
     do
     {
@@ -616,12 +653,83 @@ grub_cmd_sokoban (grub_extcmd_context_t ctxt __attribute__ ((unused)),
       continue;
     }
     else if (key == GRUB_TERM_ESC)
+    {
+      win = 0;
       break;
+    }
     else
       continue;
     if (play_game ())
+    {
+      win = 1;
       break;
+    }
   } while (1);
+  grub_free (buffer);
+  return win;
+fail:
+  if (buffer)
+    grub_free (buffer);
+  return -1;
+}
+
+static grub_err_t
+grub_cmd_sokoban (grub_extcmd_context_t ctxt,
+		int argc, char **args)
+{
+  struct grub_arg_list *state = ctxt->state;
+  /* load game data */
+  sokoban_disk_size = ALIGN_UP(sokoban_data_len, GRUB_DISK_SECTOR_SIZE);
+  sokoban_disk_addr = grub_malloc (sokoban_disk_size);
+  grub_memcpy (sokoban_disk_addr, sokoban_data, sokoban_data_len);
+  grub_disk_dev_register (&grub_sokoban_dev);
+  /* open Graphics_Output Protocol */
+  grub_efi_status_t status;
+  grub_efi_simple_text_output_mode_t saved_console_mode;
+  grub_efi_boot_services_t *b;
+  b = grub_efi_system_table->boot_services;
+  status = efi_call_3 (b->locate_protocol, &graphics_output_guid, NULL, (void **)&gop);
+  if (status != GRUB_EFI_SUCCESS)
+  {
+    grub_error (GRUB_ERR_BAD_OS, "Unable to locate Graphics Output Protocol.");
+    goto fail;
+  }
+  /* Save the current console cursor position and attributes */
+  grub_memcpy(&saved_console_mode,
+              grub_efi_system_table->con_out->mode,
+              sizeof(grub_efi_simple_text_output_mode_t));
+  efi_call_2 (grub_efi_system_table->con_out->enable_cursor,
+              grub_efi_system_table->con_out, 0);
+  efi_call_2 (grub_efi_system_table->con_out->set_attributes,
+              grub_efi_system_table->con_out,
+              GRUB_EFI_TEXT_ATTR(GRUB_EFI_LIGHTGRAY, GRUB_EFI_BACKGROUND_BLACK));
+  efi_call_3 (grub_efi_system_table->con_out->set_cursor_position,
+              grub_efi_system_table->con_out, 0, 0);
+
+  if (state[0].set)
+  {
+    CELLSIZE = 2;
+  }
+  if (argc == 1)
+  {
+    game (args[0]);
+  }
+  else
+  {
+    grub_dl_load ("newc");
+    int i = 1;
+    int win = 0;
+    char name[20];
+    for (i = 1; i < 35; i++)
+    {
+      grub_snprintf (name, 20, "(sokoban)/%d.txt", i);
+      win = game (name);
+      if (win == 1)
+        continue;
+      else
+        break;
+    }
+  }
 
   efi_call_2 (grub_efi_system_table->con_out->enable_cursor,
               grub_efi_system_table->con_out, saved_console_mode.cursor_visible);
@@ -633,6 +741,9 @@ grub_cmd_sokoban (grub_extcmd_context_t ctxt __attribute__ ((unused)),
               grub_efi_system_table->con_out,
               saved_console_mode.attribute);
   clear_screen ();
+  if (sokoban_disk_addr)
+    grub_free (sokoban_disk_addr);
+  grub_disk_dev_unregister (&grub_sokoban_dev);
 fail:
   return grub_errno;
 }
@@ -641,8 +752,8 @@ static grub_extcmd_t cmd;
 
 GRUB_MOD_INIT(sokoban)
 {
-  cmd = grub_register_extcmd ("sokoban", grub_cmd_sokoban, 0, 0,
-				  N_("UEFI sokoban game."), 0);
+  cmd = grub_register_extcmd ("sokoban", grub_cmd_sokoban, 0, N_("[FILE]"),
+				  N_("UEFI sokoban game."), options_sokoban);
 }
 
 GRUB_MOD_FINI(sokoban)
