@@ -1,0 +1,8 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = ramdisk;
+  common = contrib/ramdisk/ramdisk.c;
+  enable = i386_efi;
+  enable = x86_64_efi;
+};
