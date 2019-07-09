@@ -1,0 +1,38 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = gameboy;
+  common = contrib/gameboy/platforms/main.c;
+  common = contrib/gameboy/platforms/logger.c;
+  common = contrib/gameboy/platforms/files.c;
+  common = contrib/gameboy/platforms/debugger.c;
+  common = contrib/gameboy/platforms/libs.c;
+  common = contrib/gameboy/core/emu.c;
+  common = contrib/gameboy/core/cpu.c; 
+  common = contrib/gameboy/core/rom_info.c; 
+  common = contrib/gameboy/core/graphics.c; 
+  common = contrib/gameboy/core/sprite_priorities.c;   
+  common = contrib/gameboy/core/timers.c;
+  common = contrib/gameboy/core/interrupts.c;
+  common = contrib/gameboy/core/lcd.c;
+  common = contrib/gameboy/core/serial_io.c;
+  common = contrib/gameboy/core/mmu/memory.c; 
+  common = contrib/gameboy/core/mmu/mbc.c; 
+  common = contrib/gameboy/core/mmu/hdma.c; 
+  common = contrib/gameboy/core/mmu/mmm01.c; 
+  common = contrib/gameboy/core/mmu/mbc0.c; 
+  common = contrib/gameboy/core/mmu/mbc1.c; 
+  common = contrib/gameboy/core/mmu/mbc2.c; 
+  common = contrib/gameboy/core/mmu/mbc3.c; 
+  common = contrib/gameboy/core/mmu/mbc5.c; 
+  common = contrib/gameboy/core/mmu/huc1.c; 
+  common = contrib/gameboy/core/mmu/huc3.c; 
+  common = contrib/gameboy/shared_libs/framerate.c;
+  common = contrib/gameboy/shared_libs/graphics.c;
+  common = contrib/gameboy/shared_libs/joypad.c;
+  common = contrib/gameboy/shared_libs/serial_io.c;
+  common = contrib/gameboy/shared_libs/sound.c;
+  enable = efi;
+  cflags = '$(CFLAGS_POSIX)';
+  cppflags = '-I$(srcdir)/lib/posix_wrap';
+};
