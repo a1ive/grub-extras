@@ -109,7 +109,6 @@ int init_emu(const char *file_path, int debugger, int dmg_mode, ClientOrServer c
     log_message(LOG_INFO,"Gameboy Color Only Game:%s\n", is_colour_only() ? "Yes":"No");
     log_message(LOG_INFO,"Super Gameboy Features:%s\n", has_sgb_features() ? "Yes":"No");
 
-	
     return 1;
 }
 
@@ -153,12 +152,8 @@ void run_one_frame() {
         }
 
         cycles += current_cycles;
-      
-		#ifdef EFIAPI
-        if (cycles > 3000) {
-		#else
-		if (cycles > 15000) {
-		#endif
+
+        if (cycles > 20000) {
             quit |= update_keys();
             cycles = 0;
         }

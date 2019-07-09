@@ -21,15 +21,8 @@
 
 #include <string.h>
 
-// UEFI libc won't link memmove
-#ifdef EFIAPI
-#include "../platforms/UEFI/libs.h"
-#define PB_MEMMOVE uefi_memmove
-#else
 #define PB_MEMMOVE memmove
-#endif
 
-  
 static uint8_t mem[0xE000 - 0x8000];
 
 uint8_t *oam_mem_ptr;

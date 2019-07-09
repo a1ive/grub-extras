@@ -14,14 +14,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef EFIAPI
-#include "../platforms/UEFI/libs.h"
-#define PB_STRNCPY uefi_strncpy
-#define PB_STRCAT uefi_strcat
-#else
 #define PB_STRNCPY strncpy
 #define PB_STRCAT strcat
-#endif
 
 uint8_t *RAM_banks; // max 16 * 8KB ram banks (128KB) 0x2000
 uint8_t *ROM_banks; // max 512 * 16KB rom banks (8MB) 0x4000
