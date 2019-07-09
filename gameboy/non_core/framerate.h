@@ -1,7 +1,7 @@
 #ifndef FRAMERATE_H
 #define FRAMERATE_H
 
-#define DEFAULT_FPS 50
+#define DEFAULT_FPS 60
 
 extern int limiter; // FPS limiter ON or OFF
 

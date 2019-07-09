@@ -153,7 +153,7 @@ void run_one_frame() {
 
         cycles += current_cycles;
 
-        if (cycles > 20000) {
+        if (cycles > 15000) {
             quit |= update_keys();
             cycles = 0;
         }
