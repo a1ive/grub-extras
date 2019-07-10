@@ -52,8 +52,6 @@ GRUB_MOD_LICENSE ("GPLv3+");
 /* Number of rows that need to be cleared to increase level */
 #define ROWS_PER_LEVEL (10)
 
-#define noreturn __attribute__((noreturn)) void
-
 typedef enum bool {
     false,
     true
@@ -253,6 +251,7 @@ static void clear(enum color bg)
 #define KEY_RIGHT GRUB_TERM_KEY_RIGHT
 #define KEY_ENTER 0x0d
 #define KEY_SPACE ' '
+#define KEY_ESC   GRUB_TERM_ESC
 
 /* Return the scancode of the current up or down key if it has changed since
  * the last call, otherwise returns 0. When called on every iteration of the
@@ -452,7 +451,7 @@ struct {
 #define BAG_SIZE (7)
 grub_uint8_t bag[BAG_SIZE] = {0, 1, 2, 3, 4, 5, 6};
 
-grub_uint32_t score = 0, level = 1, speed = INITIAL_SPEED;
+grub_uint32_t score = 0, level = 1, speed = INITIAL_SPEED, max_score = 0;
 
 bool paused = false, game_over = false;
 
@@ -594,7 +593,8 @@ static void update(void)
     case 3: score += SCORE_FACTOR_3 * level; break;
     case 4: score += SCORE_FACTOR_4 * level; break;
     }
-
+    if (score > max_score)
+        max_score = score;
     /* Leveling: increase the level for every 10 rows cleared, increase game
      * speed. */
     level_rows += rows;
@@ -669,8 +669,11 @@ static void draw_about(void) {
 #define STATUS_X (COLS * 3/4)
 #define STATUS_Y (ROWS / 2 - 4)
 
-#define SCORE_X STATUS_X
-#define SCORE_Y (ROWS / 2 - 1)
+#define MAX_SCORE_X STATUS_X
+#define MAX_SCORE_Y (ROWS / 2 - 1)
+
+#define SCORE_X MAX_SCORE_X
+#define SCORE_Y (MAX_SCORE_Y + 4)
 
 #define LEVEL_X SCORE_X
 #define LEVEL_Y (SCORE_Y + 4)
@@ -741,6 +744,10 @@ status:
         puts(STATUS_X + 2, STATUS_Y, BRIGHT, BLACK, "PAUSED");
     if (game_over)
         puts(STATUS_X, STATUS_Y, BRIGHT, BLACK, "GAME OVER");
+    
+    /* Highest score */
+    puts(MAX_SCORE_X - 2, MAX_SCORE_Y, BLUE, BLACK, "HIGHEST SCORE");
+    puts(MAX_SCORE_X, MAX_SCORE_Y + 2, BRIGHT, BLACK, itoa(max_score, 10, 10));
 
     /* Score */
     puts(SCORE_X + 2, SCORE_Y, BLUE, BLACK, "SCORE");
@@ -756,6 +763,10 @@ grub_cmd_tetris (grub_extcmd_context_t ctxt __attribute__ ((unused)),
 		int argc __attribute__ ((unused)), char **args __attribute__ ((unused)))
 {
     grub_memset (well, 0, sizeof (well));
+    score = 0;
+    level = 1;
+    speed = INITIAL_SPEED;
+    paused = false;
     game_over = false;
     grub_efi_simple_text_output_mode_t saved_console_mode;
     /* Save the current console cursor position and attributes */
@@ -786,6 +797,8 @@ grub_cmd_tetris (grub_extcmd_context_t ctxt __attribute__ ((unused)),
     int last_key;
 loop:
     tps();
+    if (!debug && !statistics)
+        help = true;
 
     if (debug) {
         grub_uint32_t i;
@@ -878,6 +891,7 @@ loop:
             clear(BLACK);
             break;
         case KEY_R:
+        case KEY_ESC:
             goto fail;
         case KEY_LEFT:
             move(-1, 0);
@@ -889,6 +903,7 @@ loop:
             soft_drop();
             break;
         case KEY_UP:
+        case KEY_SPACE:
             rotate();
             break;
         case KEY_ENTER:
@@ -921,6 +936,8 @@ loop:
 
     goto loop;
 fail:
+    if (score > max_score)
+        max_score = score;
     efi_call_2 (grub_efi_system_table->con_out->enable_cursor,
               grub_efi_system_table->con_out, saved_console_mode.cursor_visible);
     efi_call_3 (grub_efi_system_table->con_out->set_cursor_position,
