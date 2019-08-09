@@ -34,7 +34,7 @@ display_status_t display_init()
 						 &graphics_output_guid, NULL, &handle_count, &handle_buffer);
 	if (status != GRUB_EFI_SUCCESS)
 	{
-		grub_printf("Failed while initializing display: b->locate_handle_buffer with GRUB_EFI_GOP_GUID returned %ld\n", status);
+		grub_printf("Failed while initializing display: b->locate_handle_buffer with GRUB_EFI_GOP_GUID returned %ld\n", (unsigned long)status);
 		return DS_ERROR;
 	}
 
@@ -43,7 +43,7 @@ display_status_t display_init()
 						 &graphics_output_guid, (void **) &graph_out);
 	if (status != GRUB_EFI_SUCCESS)
 	{
-		grub_printf("Failed while initializing display: b->handle_protocol at 0 with GRUB_EFI_GOP_GUID returned %ld\n", status);
+		grub_printf("Failed while initializing display: b->handle_protocol at 0 with GRUB_EFI_GOP_GUID returned %ld\n", (unsigned long)status);
 		return DS_ERROR;
 	}
 
