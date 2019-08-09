@@ -35,6 +35,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "smpmodule.h"
 #include "smp.h"
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
+#endif
+
 struct dword_regs {
     U32 eax;
     U32 ebx;
@@ -881,3 +886,7 @@ PyMODINIT_FUNC init_smp_module(void)
     PyModule_AddObject(m, "cpu_ping", PyLong_FromVoidPtr(cpu_ping));
     PyModule_AddObject(m, "rdtsc", PyLong_FromVoidPtr(rdtsc64));
 }
+
+#if __GNUC__ >= 9
+#pragma GCC diagnostic pop
+#endif
