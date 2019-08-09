@@ -1,0 +1,8 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = cachetest;
+  common = contrib/cachetest/cachetest.c;
+  enable = i386_efi;
+  enable = i386_pc;
+};
