@@ -1,0 +1,6 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = hello;
+  common = contrib/hello/hello.c;
+};
