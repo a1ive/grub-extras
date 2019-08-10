@@ -66,6 +66,11 @@
 
 GRUB_MOD_LICENSE ("GPLv3+");
 
+#if __GNUC__ >= 9
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Waddress-of-packed-member"
+#endif
+
 #define printf					grub_printf
 #define malloc					grub_malloc
 #define free					grub_free
@@ -1058,3 +1063,7 @@ GRUB_MOD_FINI(915resolution)
 {
   grub_unregister_command (cmd);
 }
+
+#if __GNUC__ >= 9
+#pragma GCC diagnostic pop
+#endif
