@@ -1,0 +1,6 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = raiddump;
+  common = contrib/raiddump/raiddump.c;
+};
