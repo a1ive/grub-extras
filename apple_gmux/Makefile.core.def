@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = 'apple_gmux';
+  common = contrib/apple_gmux/apple_gmux.c;
+  enable = x86;
+};
