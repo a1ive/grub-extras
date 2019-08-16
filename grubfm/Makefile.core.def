@@ -1,0 +1,6 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = grubfm;
+  common = contrib/grubfm/fm.c;
+};
