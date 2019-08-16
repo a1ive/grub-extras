@@ -111,7 +111,7 @@ grubfm_enum_device_iter (const char *name,
       }
 
       char *title = NULL;
-      title = grub_xasprintf ("(%s) [%s] %s %s", name,
+      title = grub_xasprintf ("(%s) [%s] %s %s", name,
                 grub_strlen(label)? label : "NO LABEL",
                 fs->name, uuid? uuid : "");
       char *src = NULL;
@@ -155,7 +155,7 @@ grubfm_enum_file_iter (const char *filename,
   if (info->dir)
   {
     char *title = NULL;
-    title = grub_xasprintf ("%-12s [%s]", N_("DIR"), filename);
+    title = grub_xasprintf ("%-12s [%s]", N_("DIR"), filename);
     char *src = NULL;
     src = grub_xasprintf ("grubfm \"%s/\"", pathname);
     grubfm_add_menu (title, "dir", NULL, src, 0);
@@ -180,7 +180,7 @@ grubfm_enum_file_iter (const char *filename,
     grub_file_close (file);
 
     char *title = NULL;
-    title = grub_xasprintf ("%-12s %s",
+    title = grub_xasprintf ("%-12s %s",
         grub_get_human_size (file->size, GRUB_HUMAN_SIZE_SHORT), filename);
     char *src = NULL;
     src = grub_xasprintf ("echo \"%s\"\ngetkey", pathname);
