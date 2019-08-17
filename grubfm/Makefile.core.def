@@ -3,4 +3,6 @@ AutoGen definitions Makefile.tpl;
 module = {
   name = grubfm;
   common = contrib/grubfm/fm.c;
+  common = contrib/grubfm/menu.c;
+  common = contrib/grubfm/list.c;
 };

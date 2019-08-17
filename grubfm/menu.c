@@ -23,32 +23,44 @@
 #include <grub/dl.h>
 #include <grub/extcmd.h>
 #include <grub/i18n.h>
+#include <grub/normal.h>
+#include <grub/term.h>
+#include <grub/menu.h>
 
 #include "fm.h"
 
-GRUB_MOD_LICENSE ("GPLv3+");
-
-static grub_err_t
-grub_cmd_grubfm (grub_extcmd_context_t ctxt __attribute__ ((unused)),
-        int argc, char **args)
+void
+grubfm_clear_menu (void)
 {
-  grubfm_clear_menu ();
-  if (argc == 0)
-    grubfm_enum_device ();
-  else
-    grubfm_enum_file (args[0]);
-  return 0;
+  grub_menu_t menu = grub_env_get_menu();
+  menu->entry_list = NULL;
+  menu->size=0;
 }
 
-static grub_extcmd_t cmd;
-
-GRUB_MOD_INIT(grubfm)
+void
+grubfm_add_menu (const char *title, const char *icon,
+                 const char *hotkey, const char *src, int hidden)
 {
-  cmd = grub_register_extcmd ("grubfm", grub_cmd_grubfm, 0, 0,
-                  N_("GRUB file manager."), 0);
-}
-
-GRUB_MOD_FINI(grubfm)
-{
-  grub_unregister_extcmd (cmd);
+  const char **args = NULL;
+  char **class = NULL;
+  args = grub_malloc (sizeof (args[0]));
+  if (!args)
+    return;
+  args[0] = grub_strdup (title);
+  if (icon)
+  {
+    class = grub_malloc (2 * sizeof (class[0]));
+    if (!class)
+      return;
+    class[0] = grub_strdup (icon);
+    class[1] = NULL;
+  }
+  grub_normal_add_menu_entry (1, args, class, NULL, NULL, hotkey,
+                              NULL, src, 0, hidden);
+  if (class[0])
+    grub_free (class[0]);
+  if (class)
+    grub_free (class);
+  if (args)
+    grub_free (args);
 }
