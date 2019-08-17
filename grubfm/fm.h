@@ -28,6 +28,38 @@
             grub_getkey ();            \
     } while ( 0 )
 
+/* file type */
+enum grubfm_file_type
+{
+  UNKNOWN,
+  ISO,
+  DISK,
+  VHD,
+  FBA,
+  IMAGE,
+  EFI,
+  LUA,
+  TAR,
+  WIM,
+  NT5,
+  CFG,
+  FONT,
+  MOD,
+  MBR,
+  NSH,
+  LST,
+  IPXE,
+  PYTHON,
+};
+
+struct grubfm_file_ext
+{
+  char ext[5];
+  char icon[4];
+  enum grubfm_file_type type;
+};
+
+extern struct grubfm_file_ext grubfm_file_table[];
 /* menu.c */
 void
 grubfm_clear_menu (void);
