@@ -40,15 +40,32 @@ grub_cmd_grubfm (grub_extcmd_context_t ctxt __attribute__ ((unused)),
   return 0;
 }
 
+static grub_err_t
+grub_cmd_grubfm_open (grub_extcmd_context_t ctxt __attribute__ ((unused)),
+        int argc, char **args)
+{
+  grubfm_clear_menu ();
+  if (argc != 1)
+    return grub_error (GRUB_ERR_BAD_ARGUMENT, N_("bad argument"));
+  grubfm_open_file (args[0]);
+  return 0;
+}
+
 static grub_extcmd_t cmd;
+static grub_extcmd_t cmd_open;
 
 GRUB_MOD_INIT(grubfm)
 {
-  cmd = grub_register_extcmd ("grubfm", grub_cmd_grubfm, 0, 0,
+  cmd = grub_register_extcmd ("grubfm", grub_cmd_grubfm, 0, 
+                  N_("[PATH]"),
+                  N_("GRUB file manager."), 0);
+  cmd_open = grub_register_extcmd ("grubfm_open", grub_cmd_grubfm_open, 0,
+                  N_("PATH"),
                   N_("GRUB file manager."), 0);
 }
 
 GRUB_MOD_FINI(grubfm)
 {
   grub_unregister_extcmd (cmd);
+  grub_unregister_extcmd (cmd_open);
 }

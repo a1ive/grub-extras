@@ -31,6 +31,54 @@
 #include "fm.h"
 
 static void
+grubfm_add_menu_parent (const char *dirname)
+{
+  char *parent_dir = NULL;
+  char *src = NULL;
+  parent_dir = grub_strdup (dirname);
+  *grub_strrchr (parent_dir, '/') = 0;
+  if (grub_strrchr (parent_dir, '/'))
+    *grub_strrchr (parent_dir, '/') = 0;
+  else if (parent_dir)
+    parent_dir[0] = '\0';
+  if (grub_strlen (parent_dir))
+    src = grub_xasprintf ("grubfm \"%s/\"", parent_dir);
+  else
+    src = grub_xasprintf ("grubfm");
+
+  grubfm_add_menu (_("Back"), "go-previous", NULL, src, 0);
+  grub_free (src);
+  if (parent_dir)
+    grub_free (parent_dir);
+}
+
+static void
+grubfm_add_menu_dir (const char *filename, char *pathname)
+{
+  char *title = NULL;
+  title = grub_xasprintf ("%-10s [%s]", _("DIR"), filename);
+  char *src = NULL;
+  src = grub_xasprintf ("grubfm \"%s/\"", pathname);
+  grubfm_add_menu (title, "dir", NULL, src, 0);
+  grub_free (title);
+  grub_free (src);
+}
+
+static void
+grubfm_add_menu_file (struct grubfm_enum_file_info *file, char *pathname)
+{
+  char *title = NULL;
+  title = grub_xasprintf ("%-10s %s", file->size, file->name);
+  char *src = NULL;
+  src = grub_xasprintf ("grubfm_open \"%s\"", pathname);
+  char *icon = NULL;
+  icon = grubfm_get_file_type (file);
+  grubfm_add_menu (title, icon, NULL, src, 0);
+  grub_free (title);
+  grub_free (src);
+}
+
+static void
 grubfm_enum_file_list_close (struct grubfm_enum_file_list *ctx)
 {
   int i;
@@ -149,32 +197,6 @@ grubfm_enum_file_count (const char *filename,
   return 0;
 }
 
-static void
-grubfm_add_menu_dir (const char *filename, char *pathname)
-{
-  char *title = NULL;
-  title = grub_xasprintf ("%-10s [%s]", _("DIR"), filename);
-  char *src = NULL;
-  src = grub_xasprintf ("grubfm \"%s/\"", pathname);
-  grubfm_add_menu (title, "dir", NULL, src, 0);
-  grub_free (title);
-  grub_free (src);
-}
-
-static void
-grubfm_add_menu_file (struct grubfm_enum_file_info *file, char *pathname)
-{
-  char *title = NULL;
-  title = grub_xasprintf ("%-10s %s", file->size, file->name);
-  char *src = NULL;
-  src = grub_xasprintf ("echo \"%s\"\ngetkey", pathname);
-  char *icon = NULL;
-  icon = grubfm_get_file_type (file);
-  grubfm_add_menu (title, icon, NULL, src, 0);
-  grub_free (title);
-  grub_free (src);
-}
-
 static int
 grubfm_enum_file_iter (const char *filename,
                        const struct grub_dirhook_info *info,
@@ -217,28 +239,6 @@ grubfm_enum_file_iter (const char *filename,
   }
   grub_free (pathname);
   return 0;
-}
-
-static void
-grubfm_add_menu_parent (const char *dirname)
-{
-  char *parent_dir = NULL;
-  char *src = NULL;
-  parent_dir = grub_strdup (dirname);
-  *grub_strrchr (parent_dir, '/') = 0;
-  if (grub_strrchr (parent_dir, '/'))
-    *grub_strrchr (parent_dir, '/') = 0;
-  else if (parent_dir)
-    parent_dir[0] = '\0';
-  if (grub_strlen (parent_dir))
-    src = grub_xasprintf ("grubfm \"%s/\"", parent_dir);
-  else
-    src = grub_xasprintf ("grubfm");
-
-  grubfm_add_menu (_("Back"), "go-previous", NULL, src, 0);
-  grub_free (src);
-  if (parent_dir)
-    grub_free (parent_dir);
 }
 
 int

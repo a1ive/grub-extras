@@ -96,4 +96,8 @@ grubfm_enum_file (char *dirname);
 char *
 grubfm_get_file_type (struct grubfm_enum_file_info *info);
 
+/* open.c */
+void
+grubfm_open_file (char *filename);
+
 #endif
