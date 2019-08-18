@@ -79,7 +79,13 @@ struct grubfm_enum_file_list
 };
 
 extern struct grubfm_file_ext grubfm_file_table[];
-/* menu.c */
+/* lib.c */
+int
+grubfm_dir_exist (char *path);
+int
+grubfm_file_exist (char *path);
+int
+grubfm_run_cmd (const char *cmdline, grub_err_t *errno);
 void
 grubfm_clear_menu (void);
 void
@@ -98,6 +104,6 @@ grubfm_get_file_type (struct grubfm_enum_file_info *info);
 
 /* open.c */
 void
-grubfm_open_file (char *filename);
+grubfm_open_file (char *path);
 
 #endif
