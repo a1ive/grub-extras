@@ -30,23 +30,6 @@
 
 #include "fm.h"
 
-struct grubfm_enum_file_info
-{
-  char *name;
-  char *size;
-};
-
-struct grubfm_enum_file_list
-{
-  int nfiles;
-  struct grubfm_enum_file_info *file_list;
-  int ndirs;
-  struct grubfm_enum_file_info *dir_list;
-  char *dirname;
-  int f;
-  int d;
-};
-
 static void
 grubfm_enum_file_list_close (struct grubfm_enum_file_list *ctx)
 {
@@ -185,7 +168,9 @@ grubfm_add_menu_file (struct grubfm_enum_file_info *file, char *pathname)
   title = grub_xasprintf ("%-10s %s", file->size, file->name);
   char *src = NULL;
   src = grub_xasprintf ("echo \"%s\"\ngetkey", pathname);
-  grubfm_add_menu (title, "file", NULL, src, 0);
+  char *icon = NULL;
+  icon = grubfm_get_file_type (file);
+  grubfm_add_menu (title, icon, NULL, src, 0);
   grub_free (title);
   grub_free (src);
 }
@@ -210,6 +195,7 @@ grubfm_enum_file_iter (const char *filename,
   if (info->dir)
   {
     ctx->dir_list[ctx->d].name = grub_strdup(filename);
+    ctx->dir_list[ctx->d].type = DIR;
     ctx->d++;
   }
   else

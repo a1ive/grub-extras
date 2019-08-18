@@ -32,6 +32,7 @@
 enum grubfm_file_type
 {
   UNKNOWN,
+  DIR,
   ISO,
   DISK,
   VHD,
@@ -54,9 +55,27 @@ enum grubfm_file_type
 
 struct grubfm_file_ext
 {
-  char ext[5];
-  char icon[4];
+  char ext[8];
+  char icon[5];
   enum grubfm_file_type type;
+};
+
+struct grubfm_enum_file_info
+{
+  char *name;
+  char *size;
+  enum grubfm_file_type type;
+};
+
+struct grubfm_enum_file_list
+{
+  int nfiles;
+  struct grubfm_enum_file_info *file_list;
+  int ndirs;
+  struct grubfm_enum_file_info *dir_list;
+  char *dirname;
+  int f;
+  int d;
 };
 
 extern struct grubfm_file_ext grubfm_file_table[];
@@ -72,5 +91,9 @@ int
 grubfm_enum_device (void);
 int
 grubfm_enum_file (char *dirname);
+
+/* type.c */
+char *
+grubfm_get_file_type (struct grubfm_enum_file_info *info);
 
 #endif
