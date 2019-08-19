@@ -85,7 +85,9 @@ grubfm_dir_exist (char *path);
 int
 grubfm_file_exist (char *path);
 int
-grubfm_run_cmd (const char *cmdline, grub_err_t *errno);
+grubfm_command_exist (const char *str);
+grub_err_t
+grubfm_run_cmd (const char *cmdline);
 void
 grubfm_clear_menu (void);
 void

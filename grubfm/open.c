@@ -30,6 +30,11 @@
 
 #include "fm.h"
 
+#define REQUIRE(x) do { \
+    if (!grubfm_command_exist (x))  \
+      return;  \
+  } while (0)
+
 static void
 grubfm_add_menu_back (const char *filename)
 {
@@ -49,9 +54,10 @@ grubfm_add_menu_back (const char *filename)
 static void
 grubfm_open_iso_loopback (grub_file_t file, char *path)
 {
+  REQUIRE ("loopback");
   char *src = NULL;
   src = grub_xasprintf ("loopback iso_loop \"%s\"", path);
-  if (!grubfm_run_cmd (src, NULL))
+  if (!grubfm_run_cmd (src))
     return;
   grub_free (src);
   if (grubfm_file_exist ((char *)"(iso_loop)/boot/grub/loopback.cfg"))
@@ -85,6 +91,7 @@ static void
 grubfm_open_efi (grub_file_t file __attribute__ ((unused)), char *path)
 {
 #ifdef GRUB_MACHINE_EFI
+  REQUIRE ("chainloader");
   char *src = NULL;
   src = grub_xasprintf ("set lang=en_US\nchainloader -b -t \"%s\"", path);
   if (!src)

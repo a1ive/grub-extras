@@ -184,11 +184,17 @@ grubfm_add_menu (const char *title, const char *icon,
 }
 
 int
-grubfm_run_cmd (const char *cmdline, grub_err_t *errno)
+grubfm_command_exist (const char *str)
+{
+  return grub_command_find (str)? 1: 0;
+}
+
+grub_err_t
+grubfm_run_cmd (const char *cmdline)
 {
   int n;
   char ** args;
-  int found = 1;
+  grub_err_t errno = GRUB_ERR_NONE;
   if ((! grub_parser_split_cmdline (cmdline, 0, 0, &n, &args))
       && (n >= 0))
   {
@@ -196,13 +202,13 @@ grubfm_run_cmd (const char *cmdline, grub_err_t *errno)
 
     cmd = grub_command_find (args[0]);
     if (cmd)
-      *errno = (cmd->func) (cmd, n-1, &args[1]);
+      errno = (cmd->func) (cmd, n-1, &args[1]);
     else
-      found = 0;
+      errno = GRUB_ERR_UNKNOWN_COMMAND;
 
     grub_free (args[0]);
     grub_free (args);
   }
 
-  return found;
+  return errno;
 }
