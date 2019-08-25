@@ -30,11 +30,17 @@
 
 #include "fm.h"
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#endif
+
 #define REQUIRE(x) do { \
     if (!grubfm_command_exist (x))  \
       return;  \
   } while (0)
 
+#define UNUSED __attribute__ ((unused))
 static void
 grubfm_add_menu_back (const char *filename)
 {
@@ -88,7 +94,7 @@ grubfm_open_iso_loopback (grub_file_t file, char *path)
 }
 
 static void
-grubfm_open_efi (grub_file_t file __attribute__ ((unused)), char *path)
+grubfm_open_efi (grub_file_t file UNUSED, char *path)
 {
 #ifdef GRUB_MACHINE_EFI
   REQUIRE ("chainloader");
@@ -97,6 +103,87 @@ grubfm_open_efi (grub_file_t file __attribute__ ((unused)), char *path)
   if (!src)
     return;
   grubfm_add_menu (_("Open As EFI Application"), "uefi", NULL, src, 0);
+  grub_free (src);
+#endif
+}
+
+static void
+grubfm_open_lua (grub_file_t file UNUSED, char *path)
+{
+  REQUIRE ("lua");
+  char *src = NULL;
+  src = grub_xasprintf ("lua \"%s\"", path);
+  if (!src)
+    return;
+  grubfm_add_menu (_("Open As Lua Script"), "lua", NULL, src, 0);
+  grub_free (src);
+}
+
+static void
+grubfm_open_wim_wimboot (grub_file_t file UNUSED, char *path)
+{
+  REQUIRE ("loopback");
+  char *src = NULL;
+#ifdef GRUB_MACHINE_EFI
+#if (defined (__i386__) || defined (__x86_64__))
+  REQUIRE ("wimboot");
+  src = grub_xasprintf ("set lang=en_US\n"
+                        "loopback wimboot ${prefix}/wimboot.gz\n"
+                        "wimboot @:bootmgfw.efi:(wimboot)/bootmgfw.efi"
+                        " @:bcd:(wimboot)/bcd @:boot.sdi:(wimboot)/boot.sdi" 
+                        " @:boot.wim:\"%s\"", path);
+#endif /* __i386__ || __x86_64__ */
+#elif GRUB_MACHINE_PCBIOS
+  REQUIRE ("linux16");
+  src = grub_xasprintf ("set lang=en_US\n"
+                        "terminal_output console\n"
+                        "enable_progress_indicator=1\n"
+                        "loopback wimboot /wimboot\n"
+                        "linux16 (wimboot)/wimboot\n"
+                        "initrd16 newc:bootmgr:(wimboot)/bootmgr"
+                        " newc:bootmgr.exe:(wimboot)/bootmgr.exe"
+                        " newc:bcd:(wimboot)/bcd newc:boot.sdi:(wimboot)/boot.sdi" 
+                        " newc:boot.wim:\"%s\"", path);
+#endif
+  if (!src)
+    return;
+  grubfm_add_menu (_("Boot NT6.x WIM (wimboot)"), "wim", NULL, src, 0);
+  grub_free (src);
+}
+
+static void
+grubfm_open_font (grub_file_t file UNUSED, char *path)
+{
+  char *src = NULL;
+  src = grub_xasprintf ("loadfont \"%s\"", path);
+  if (!src)
+    return;
+  grubfm_add_menu (_("Load PF2 Font"), "pf2", NULL, src, 0);
+  grub_free (src);
+}
+
+static void
+grubfm_open_mod (grub_file_t file UNUSED, char *path)
+{
+  char *src = NULL;
+  src = grub_xasprintf ("insmod \"%s\"", path);
+  if (!src)
+    return;
+  grubfm_add_menu (_("Insert Grub2 Module"), "mod", NULL, src, 0);
+  grub_free (src);
+}
+
+static void
+grubfm_open_ipxe (grub_file_t file UNUSED, char *path)
+{
+#ifdef GRUB_MACHINE_PCBIOS
+  REQUIRE ("linux16");
+  char *src = NULL;
+  src = grub_xasprintf ("linux16 ${prefix}/ipxe.lkrn\ninitrd16 \"%s\"", path);
+  if (!src)
+    return;
+  grubfm_add_menu (_("Open As iPXE Script"), "net", NULL, src, 0);
+  grub_free (src);
 #endif
 }
 
@@ -129,19 +216,24 @@ grubfm_open_file (char *path)
       break;
     case EFI:
       grubfm_open_efi (file, path);
+      break;
     case LUA:
+      grubfm_open_lua (file, path);
       break;
     case TAR:
       break;
     case WIM:
+      grubfm_open_wim_wimboot (file, path);
       break;
     case NT5:
       break;
     case CFG:
       break;
     case FONT:
+      grubfm_open_font (file, path);
       break;
     case MOD:
+      grubfm_open_mod (file, path);
       break;
     case MBR:
       break;
@@ -150,6 +242,7 @@ grubfm_open_file (char *path)
     case LST:
       break;
     case IPXE:
+      grubfm_open_ipxe (file, path);
       break;
     case PYTHON:
       break;
@@ -158,3 +251,7 @@ grubfm_open_file (char *path)
   }
   grub_file_close (file);
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
