@@ -1,7 +1,0 @@
-AutoGen definitions Makefile.tpl;
-
-module = {
-  name = tetris;
-  common = contrib/tetris/tetris.c;
-  enable = x86_64-efi;
-};
