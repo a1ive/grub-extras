@@ -29,6 +29,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef COMPAT_H
 #define COMPAT_H
 
+#if 0
 static inline int strncmp(const char *s1, const char *s2, size_t n)
 {
     grub_errno = GRUB_ERR_NONE;
@@ -46,5 +47,6 @@ static inline long int strtoul(const char *nptr, char **endptr, int base)
     grub_errno = GRUB_ERR_NONE;
     return grub_strtoul(nptr, endptr, base);
 }
+#endif
 
 #endif /* COMPAT_H */
