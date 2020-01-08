@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = android;
+  common = contrib/android/android.c;
+  enable = x86;
+};
