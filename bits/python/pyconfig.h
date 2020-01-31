@@ -165,7 +165,8 @@ time_t mktime(struct tm *tm);
 
 int printf(const char *format, ...);
 void qsort(void *base_void, size_t nmemb, size_t size, int(*compar)(const void *, const void *));
-int rand(void);
+int py_rand(void);
+#define rand py_rand
 void rewind(FILE *stream);
 void setbuf(FILE *stream, char *buf);
 
@@ -177,7 +178,8 @@ sighandler_t signal(int signum, sighandler_t handler);
 
 int snprintf(char *str, size_t size, const char *format, ...);
 int sprintf(char *str, const char *format, ...);
-void srand(unsigned seed);
+void py_srand(unsigned seed);
+#define srand py_srand
 int stat(const char *path, struct stat *buf);
 char *strdup(const char *s);
 char *strerror(int errnum);

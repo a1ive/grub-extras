@@ -476,7 +476,7 @@ void qsort(void *base_void, size_t nmemb, size_t size, int(*compar)(const void *
     qsort(base + (last + 1)*size, nmemb - (last + 1), size, compar);
 }
 
-int rand(void)
+int py_rand(void)
 {
     unsigned bit;                    /* Must be 16bit to allow bit<<15 later in the code */
     unsigned lfsr = random_seed;
@@ -530,7 +530,7 @@ int sprintf(char *str, const char *format, ...)
     return ret;
 }
 
-void srand(unsigned seed)
+void py_srand(unsigned seed)
 {
     random_seed = seed;
     return;
