@@ -1,0 +1,8 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = peinfo;
+  common = contrib/peinfo/peinfo.c;
+  cflags = '$(CFLAGS_POSIX)';
+  cppflags = '$(CPPFLAGS_POSIX)';
+};
