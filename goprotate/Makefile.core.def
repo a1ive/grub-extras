@@ -1,0 +1,7 @@
+AutoGen definitions Makefile.tpl;
+
+module = {
+  name = goprotate;
+  common = contrib/goprotate/goprotate.c;
+  enable = efi;
+};
