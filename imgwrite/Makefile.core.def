@@ -1,6 +1,0 @@
-AutoGen definitions Makefile.tpl;
-
-module = {
-  name = imgwrite;
-  common = contrib/imgwrite/imgwrite.c;
-};

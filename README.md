@@ -1,3 +1,4 @@
+# NOTICE: THIS REPOSITORY IS DEPRECATED
 
 grub-extras is meant to be used as an overlay on grub2 source tree.
 

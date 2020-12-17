@@ -1,8 +1,0 @@
-AutoGen definitions Makefile.tpl;
-
-module = {
-  name = s0enabler;
-  common = contrib/s0ix/s0enabler.c;
-  enable = efi;
-  enable = i386_pc;
-};
